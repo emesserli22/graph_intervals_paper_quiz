@@ -121,7 +121,7 @@
       const height = canvas.height;
       ctx.clearRect(0, 0, width, height);
 
-      const margin = 30;
+      const margin = 40;
       const gridWidth = width - 2 * margin;
       const gridHeight = height - 2 * margin;
 
@@ -169,10 +169,8 @@
       ctx.lineTo(originX, height - margin);
       ctx.stroke();
 
-      if (hideLabels) return;
-
       ctx.fillStyle = 'black';
-      ctx.font = '10px Arial';
+      ctx.font = '12px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
 
@@ -183,6 +181,8 @@
         ctx.moveTo(x, originY - tickHeight / 2);
         ctx.lineTo(x, originY + tickHeight / 2);
         ctx.stroke();
+
+        if (hideLabels) continue;
 
         if (partialLabels) {
           if (i === 0) continue;
@@ -214,6 +214,8 @@
         ctx.moveTo(originX - tickWidth / 2, y);
         ctx.lineTo(originX + tickWidth / 2, y);
         ctx.stroke();
+
+        if (hideLabels) continue;
 
         if (partialLabels) {
           if (i === 0) continue;
@@ -284,13 +286,11 @@
       if (includeNegatives) {
         xValues = Array.from({length: intervals * 2 + 1}, (_, i) => +(xScale * (i - intervals)).toFixed(5));
         yValues = Array.from({length: intervals * 2 + 1}, (_, i) => +(yScale * (i - intervals)).toFixed(5));
-        questionText = `On the coordinate grid below, label the x-axis so that it has a scale (or interval) of ${formatScale(xScale)} and the y-axis so that it has a scale (or interval) of ${formatScale(yScale)}.<br>
-          - There are ${intervals} intervals on each side of zero, so please label the axes accordingly.<br>`;
+        questionText = `On the coordinate grid below, label the x-axis so that it has a scale (or interval) of <strong>${formatScale(xScale)}</strong> and the y-axis so that it has a scale (or interval) of <strong>${formatScale(yScale)}</strong>. There are 5 intervals on each side of zero, so please label the axes accordingly.`;
       } else {
         xValues = Array.from({length: intervals + 1}, (_, i) => +(xScale * i).toFixed(5));
         yValues = Array.from({length: intervals + 1}, (_, i) => +(yScale * i).toFixed(5));
-        questionText = `On the coordinate grid below, label the x-axis so that it has a scale (or interval) of ${formatScale(xScale)} and the y-axis so that it has a scale (or interval) of ${formatScale(yScale)}.<br>
-          - There are ${intervals} intervals on each axis, so please label the axes accordingly.<br>`;
+        questionText = `On the coordinate grid below, label the x-axis so that it has a scale (or interval) of <strong>${formatScale(xScale)}</strong> and the y-axis so that it has a scale (or interval) of <strong>${formatScale(yScale)}</strong>. There are 5 intervals on each axis, so please label the axes accordingly.`;
       }
 
       return {
@@ -503,7 +503,7 @@
           div.appendChild(canvas);
 
           // Draw blank grid (no labels)
-          drawGrid(canvas, q.xValues[1] - q.xValues[0], q.yValues[1] - q.yValues[0], 4, false, [], [], true);
+          drawPaperGrid(canvas);
 
           // Add blank lines for answers
           questionHTML += `<p><em>Write the x-axis values on the grid above.</em></p>`;
@@ -511,7 +511,7 @@
           questionHTML += `<p><em>Write the y-axis values on the grid above.</em></p>`;
           questionHTML += `<div class="paper-answer-space"></div>`;
 
-          div.innerHTML = questionHTML + div.innerHTML; // prepend questionHTML before canvas
+          div.innerHTML = questionHTML + div.innerHTML; // prepend instructions before canvas
         }
 
         paperQuizContainer.appendChild(div);
@@ -522,6 +522,60 @@
       printBtn.textContent = "Print / Save as PDF";
       printBtn.onclick = () => window.print();
       paperQuizContainer.appendChild(printBtn);
+    }
+
+    // Draw blank 10x10 grid for paper quiz axis-values questions
+    function drawPaperGrid(canvas) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const margin = 30;
+      const gridSize = 10; // 10 squares per axis
+      const gridWidth = width - 2 * margin;
+      const gridHeight = height - 2 * margin;
+      const cellWidth = gridWidth / gridSize;
+      const cellHeight = gridHeight / gridSize;
+
+      ctx.strokeStyle = '#ccc';
+      ctx.lineWidth = 1;
+
+      // Vertical grid lines
+      for (let i = 0; i <= gridSize; i++) {
+        const x = margin + i * cellWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, margin);
+        ctx.lineTo(x, height - margin);
+        ctx.stroke();
+      }
+
+      // Horizontal grid lines
+      for (let i = 0; i <= gridSize; i++) {
+        const y = margin + i * cellHeight;
+        ctx.beginPath();
+        ctx.moveTo(margin, y);
+        ctx.lineTo(width - margin, y);
+        ctx.stroke();
+      }
+
+      // Draw axes thicker and black
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 2;
+
+      // x-axis in middle
+      const originY = margin + gridSize / 2 * cellHeight;
+      ctx.beginPath();
+      ctx.moveTo(margin, originY);
+      ctx.lineTo(width - margin, originY);
+      ctx.stroke();
+
+      // y-axis in middle
+      const originX = margin + gridSize / 2 * cellWidth;
+      ctx.beginPath();
+      ctx.moveTo(originX, margin);
+      ctx.lineTo(originX, height - margin);
+      ctx.stroke();
     }
   </script>
 </body>
